@@ -16,7 +16,7 @@ back-dev:
 	echo "Starting dev server..."
 	docker-compose -f docker-compose.dev.yml up --build;
 
-front-dev: 
+front-dev:
 	echo "Starting front-end dev server..."
 	cd opservatory/client; npm run dev;
 
