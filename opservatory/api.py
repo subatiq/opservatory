@@ -1,3 +1,5 @@
+from datetime import timedelta
+from ipaddress import IPv4Address
 import os
 from datetime import timedelta
 from ipaddress import IPv4Address
@@ -16,7 +18,7 @@ from opservatory.app import (cancel_reservation, get_fleet_state,
                              reserve_machine)
 from opservatory.auth.adapters.sqlite_repo import SQLiteAuthRepository
 from opservatory.auth.exceptions import IncorrectPassword, UserAlreadyExists, UserDoesNotExist
-from opservatory.auth.jwt import create_access_token, user_from_token, verify_token
+from opservatory.auth.jwt import create_access_token, user_from_token
 from opservatory.auth.models import Credentials, User
 from opservatory.models import Config, Fleet, Reservation, ReservationRequest
 from opservatory.scheduler import sched
