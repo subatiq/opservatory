@@ -1,14 +1,25 @@
 site_name: Opservatory
-theme: 
-  logo: brands/logo_white.svg
-  features:
-    - navigation.instant
-    - navigation.sections
-    - content.tabs.link
-  name: material
-  icon: 
+
+nav:
+  - about.md
+  - index.md
+
+theme:
+  icon:
     repo: fontawesome/brands/github
+  logo: brands/logo_bnw.png
+  favicon: brands/logo_bnw.png
+  name: material
   palette:
-    scheme: slate
     primary: black
-    accesnt: light blue
+
+repo_url: https://github.com/subatiq/opservatory
+repo_name: subatiq/opservatory 
+
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences 

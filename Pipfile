@@ -13,6 +13,9 @@ jinja2 = "*"
 kornet = "0.0.18"
 loguru = "*"
 bandit = "*"
+pyyaml = "*"
+python-jose = {extras = ["cryptography"], version = "*"}
+passlib = "*"
 
 [dev-packages]
 wily = "*"
