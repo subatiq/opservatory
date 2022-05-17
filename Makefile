@@ -1,3 +1,7 @@
+dev: build
+	echo "Starting dev server..."
+	docker-compose -f docker-compose.dev.yml up;
+
 build:
 	echo "Building..."
 	cd opservatory/client; npm run build;
