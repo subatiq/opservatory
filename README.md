@@ -8,6 +8,8 @@
 
 API for checking docker containers states in a small infrastructure
 
+CLI https://github.com/subatiq/ops
+
 ---
 
 ## Quick start
