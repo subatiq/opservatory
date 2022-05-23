@@ -11,7 +11,7 @@ from loguru import logger
 from pytimeparse.timeparse import timeparse
 
 from opservatory.infrastructure.communicator import InfrastructureCommunicator
-from opservatory.models import OS, DockerContainer, Fleet, Machine, MachineState, Memory, Processor
+from opservatory.models import OS, DockerContainer, Fleet, Machine, Memory, Processor
 
 CURRENT_PATH = Path(os.path.dirname(__file__))
 
@@ -68,8 +68,6 @@ class KornetCommunicator(InfrastructureCommunicator):
                         containers=[],
                     )
                 )
-            if outcome.facts.os or outcome.facts.ram or outcome.facts.cpu:
-                fleet.ip2machine[host.ip].state = MachineState.FREE
 
             if outcome.facts.os:
                 fleet.ip2machine[host.ip].os = OS(
@@ -110,11 +108,6 @@ class KornetCommunicator(InfrastructureCommunicator):
                 containers.append(self._parse_container(container))
 
             fleet.ip2machine[host.ip].containers = containers
-
-            fleet.ip2machine[host.ip].state = MachineState.FREE
-            if len(containers) > 0 and fleet.ip2machine[host.ip].state != MachineState.RESERVED:
-                fleet.ip2machine[host.ip].state = MachineState.BUSY
-
             fleet.ip2machine[host.ip].updated_at = datetime.now()
 
         return fleet

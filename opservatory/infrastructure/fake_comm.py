@@ -4,7 +4,7 @@ from hypothesis import strategies as st
 from hypothesis.strategies import DataObject
 
 from opservatory.infrastructure.communicator import InfrastructureCommunicator
-from opservatory.models import OS, DockerContainer, Fleet, Machine, MachineState, Memory, Processor
+from opservatory.models import OS, DockerContainer, Fleet, Machine, Memory, Processor
 
 
 class FakeCommunicator(InfrastructureCommunicator):
@@ -15,7 +15,7 @@ class FakeCommunicator(InfrastructureCommunicator):
     def _cheak_reachability(self, machine: Machine) -> bool:
         reachable = self._test_data.draw(st.booleans())
         if not reachable:
-            machine.state = MachineState.UNREACHABLE
+            machine.connection_broken()
 
         return reachable
 
