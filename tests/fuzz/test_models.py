@@ -13,8 +13,16 @@ import opservatory.auth.models
 import opservatory.infrastructure.models
 import opservatory.models
 from opservatory.auth.models import ContactInfo, Credentials, User
-from opservatory.models import (OS, AuthConfig, DockerContainer, Machine,
-                                MachineState, Memory, Processor, Reservation)
+from opservatory.models import (
+    OS,
+    AuthConfig,
+    DockerContainer,
+    Machine,
+    MachineState,
+    Memory,
+    Processor,
+    Reservation,
+)
 
 
 @given(...)
@@ -94,11 +102,20 @@ def test_fuzz_ReservationRequest(reason: str, machine_ip: IPv4Address):
 
 @given(...)
 def test_fuzz_User(
-    name: str, credentials: Credentials, contacts: ContactInfo, privilege: opservatory.auth.models.Privilege
+    name: str,
+    credentials: Credentials,
+    contacts: ContactInfo,
+    privilege: opservatory.auth.models.Privilege,
 ):
-    opservatory.models.User(name=name, credentials=credentials, contacts=contacts, privilege=privilege)
+    opservatory.models.User(
+        name=name, credentials=credentials, contacts=contacts, privilege=privilege
+    )
 
 
 @given(...)
-def test_fuzz_InventoryMachine(name: str, ip: IPv4Address, username: SecretStr, password: SecretStr):
-    opservatory.infrastructure.models.InventoryMachine(name=name, ip=ip, username=username, password=password)
+def test_fuzz_InventoryMachine(
+    name: str, ip: IPv4Address, username: SecretStr, password: SecretStr
+):
+    opservatory.infrastructure.models.InventoryMachine(
+        name=name, ip=ip, username=username, password=password
+    )

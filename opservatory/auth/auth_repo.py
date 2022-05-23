@@ -12,7 +12,9 @@ class AuthRepository(ABC):
         super().__init__()
 
     def _verify_password(self, plain_password: SecretStr, hashed_password: SecretStr) -> bool:
-        return self.pwd_context.verify(plain_password.get_secret_value(), hashed_password.get_secret_value())
+        return self.pwd_context.verify(
+            plain_password.get_secret_value(), hashed_password.get_secret_value()
+        )
 
     def _get_password_hash(self, password: SecretStr) -> SecretStr:
         return SecretStr(self.pwd_context.hash(password.get_secret_value()))

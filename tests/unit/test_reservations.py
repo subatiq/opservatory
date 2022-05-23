@@ -49,7 +49,9 @@ def test_cancel_reservation(machine: models.Machine):
 
     assert machine.reservation is not None
 
-    app.cancel_reservation(repo=repo, machine_ip=machine.ip, username=machine.reservation.user.credentials.username)
+    app.cancel_reservation(
+        repo=repo, machine_ip=machine.ip, username=machine.reservation.user.credentials.username
+    )
 
     assert len(repo.read_fleet().machines) == 1
     assert repo.read_fleet().machines[0].reservation is None

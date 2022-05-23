@@ -4,8 +4,7 @@ from hypothesis import strategies as st
 from hypothesis.strategies import DataObject
 
 from opservatory.infrastructure.communicator import InfrastructureCommunicator
-from opservatory.models import (OS, DockerContainer, Fleet, Machine,
-                                MachineState, Memory, Processor)
+from opservatory.models import OS, DockerContainer, Fleet, Machine, MachineState, Memory, Processor
 
 
 class FakeCommunicator(InfrastructureCommunicator):
