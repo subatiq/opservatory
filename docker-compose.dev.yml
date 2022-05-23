@@ -4,6 +4,6 @@ services:
   opservatory-worker:
     image: opservatory
     ports:
-     - "5000:5000"
+      - "5000:5000"
     volumes:
       - ./volumes:/app/opservatory/mounts

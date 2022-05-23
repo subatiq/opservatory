@@ -1,53 +1,50 @@
-from datetime import datetime, timedelta
+from contextlib import contextmanager
 from ipaddress import IPv4Address
-from opservatory.auth.models import User
+from typing import Iterator
+
+from opservatory.exceptions import AccessDenied, MachineAlreadyReserved
 from opservatory.infrastructure.communicator import InfrastructureCommunicator
 from opservatory.models import Fleet, Machine, Reservation
 from opservatory.state.state_repo import StateRepository
 
 
-def update_fleet_facts(comm: InfrastructureCommunicator, repo: StateRepository) -> Fleet:
+@contextmanager
+def fleet_context(repo: StateRepository) -> Iterator[Fleet]:
     fleet = repo.read_fleet()
-    fleet = comm.gather_facts(fleet)
+    yield fleet
     repo.save_fleet(fleet)
-    return fleet
+
+
+def update_fleet_facts(comm: InfrastructureCommunicator, repo: StateRepository) -> Fleet:
+    with fleet_context(repo) as fleet:
+        fleet = comm.gather_facts(fleet)
+        return fleet
 
 
 def update_containers_info(comm: InfrastructureCommunicator, repo: StateRepository) -> Fleet:
-    fleet = repo.read_fleet()
-    fleet = comm.update_machines_info(fleet)
-    repo.save_fleet(fleet)
-    return fleet
+    with fleet_context(repo) as fleet:
+        fleet = comm.update_machines_info(fleet)
+        return fleet
 
 
-def save_fleet(fleet: Fleet, repo: StateRepository):
-    repo.save_fleet(fleet)
+def reserve_machine(repo: StateRepository, machine_ip: IPv4Address, reservation: Reservation):
+    with fleet_context(repo) as fleet:
+        machine = fleet.find(machine_ip)
+
+        if machine.reservation is not None:
+            raise MachineAlreadyReserved(machine_ip)
+
+        machine.reservation = reservation
 
 
-def reserve_machine(repo: StateRepository, machine_ip: IPv4Address, reservation: Reservation) -> bool:
-    fleet = repo.read_fleet()
+def cancel_reservation(repo: StateRepository, machine_ip: IPv4Address, username: str):
+    with fleet_context(repo) as fleet:
+        machine = fleet.find(machine_ip)
 
-    machine = fleet.ip2machine[machine_ip]
-    if machine.reservation is not None:
-        return False
+        if machine.reservation and machine.reservation.user.credentials.username != username:
+            raise AccessDenied(action="Cancellation", username=username)
 
-    machine.reservation = reservation
-    save_fleet(fleet, repo)
-
-    return True
-
-
-def cancel_reservation(repo: StateRepository, machine_ip: IPv4Address, username: str) -> bool:
-    fleet = repo.read_fleet()
-    machine = fleet.ip2machine[machine_ip]
-
-    if machine.reservation and machine.reservation.user.credentials.username != username:
-        raise Exception("You are not the owner of this machine")
-
-    machine.reservation = None
-    save_fleet(fleet, repo)
-
-    return True
+        machine.reservation = None
 
 
 def get_fleet_state(repo: StateRepository) -> Fleet:
@@ -56,4 +53,4 @@ def get_fleet_state(repo: StateRepository) -> Fleet:
 
 def free_machines(repo: StateRepository) -> list[Machine]:
     machines = repo.read_fleet().machines
-    return list(filter(lambda machine: len(machine.containers) <= 0, machines))
+    return [machine for machine in machines if machine.reservation is None and machine.is_free()]

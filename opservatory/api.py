@@ -1,23 +1,26 @@
+import os
 from datetime import timedelta
 from ipaddress import IPv4Address
-import os
 from pathlib import Path
 from starlette.datastructures import Headers
 from fastapi import FastAPI, Request, Response
 import yaml
-from opservatory.app import cancel_reservation, get_fleet_state, reserve_machine
+from fastapi import APIRouter, FastAPI, Request, Response
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from loguru import logger
+from passlib.context import CryptContext
+from starlette.datastructures import Headers
+
+from opservatory.app import (cancel_reservation, get_fleet_state,
+                             reserve_machine)
 from opservatory.auth.adapters.sqlite_repo import SQLiteAuthRepository
 from opservatory.auth.exceptions import IncorrectPassword, UserAlreadyExists, UserDoesNotExist
 from opservatory.auth.jwt import create_access_token, user_from_token, verify_token
 from opservatory.auth.models import Credentials, User
 from opservatory.models import Config, Fleet, Reservation, ReservationRequest
-from fastapi.staticfiles import StaticFiles
-from passlib.context import CryptContext
 from opservatory.scheduler import sched
-
 from opservatory.state.adapters.json_repo import JsonStateRepository
-from fastapi.middleware.cors import CORSMiddleware
-
 
 app = FastAPI(title="Opservatory Client")
 
@@ -25,7 +28,7 @@ app = FastAPI(title="Opservatory Client")
 PROJECT_PATH = Path(os.path.dirname(__file__))
 STATE_DUMP_PATH = PROJECT_PATH / "mounts" / "state.json"
 USER_DB_PATH = PROJECT_PATH / "mounts" / "users.db"
-print("Creating volumes folder...", STATE_DUMP_PATH.parent)
+logger.info("Creating volumes folder...", STATE_DUMP_PATH.parent)
 STATE_DUMP_PATH.parent.mkdir(parents=True, exist_ok=True)
 
 CONFIG_PATH = PROJECT_PATH / "mounts" / "config.yml"
@@ -82,7 +85,6 @@ async def login(credentials: Credentials, request: Request):
     try:
         user = repo.login(credentials)
         to_encode = {"user": user.dict(exclude={"credentials": {"password"}, "contacts": True})}
-        print(f"{to_encode=}")
         token = create_access_token(
             data=to_encode, secret_key=SECRET_KEY, algorithm=ALGORITHM, expires_delta=ACCESS_TOKEN_EXPIRE_MINUTES
         )

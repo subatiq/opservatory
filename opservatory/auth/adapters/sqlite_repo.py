@@ -1,11 +1,12 @@
-from pathlib import Path
 import sqlite3
-
-from pydantic import SecretStr
+from pathlib import Path
 
 from passlib.context import CryptContext
+from pydantic import SecretStr
+
 from opservatory.auth.auth_repo import AuthRepository
-from opservatory.auth.exceptions import IncorrectPassword, UserAlreadyExists, UserDoesNotExist
+from opservatory.auth.exceptions import (IncorrectPassword, UserAlreadyExists,
+                                         UserDoesNotExist)
 from opservatory.auth.models import ContactInfo, Credentials, Privilege, User
 
 
