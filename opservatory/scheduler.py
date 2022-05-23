@@ -18,7 +18,11 @@ PROJECT_PATH = Path(os.path.dirname(__file__))
 STATE_DUMP_PATH = PROJECT_PATH / "volumes" / "state.json"
 
 
-@sched.scheduled_job(id="facts_update", trigger=CronTrigger.from_crontab("*/10 * * * *"), next_run_time=datetime.now())  # type: ignore
+@sched.scheduled_job(
+    id="facts_update",
+    trigger=CronTrigger.from_crontab("*/10 * * * *"),
+    next_run_time=datetime.now(),
+)
 def update_fleet():
     logger.info("Updating fleet facts...")
     comm = KornetCommunicator()
@@ -31,7 +35,11 @@ def update_fleet():
     logger.info("Machines updated:", len(fleet.machines))
 
 
-@sched.scheduled_job(id="containers_update", trigger=CronTrigger.from_crontab("* * * * *"), next_run_time=datetime.now())  # type: ignore
+@sched.scheduled_job(
+    id="containers_update",
+    trigger=CronTrigger.from_crontab("* * * * *"),
+    next_run_time=datetime.now(),
+)
 def update_docker_images():
     logger.info("Updating fleet business state...")
     comm = KornetCommunicator()

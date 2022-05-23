@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from loguru import logger
@@ -25,8 +25,6 @@ CONFIG = Config.parse_raw(CONFIG_PATH.open().read())
 
 sched.start()
 
-
-from fastapi import APIRouter, FastAPI
 
 app = FastAPI()
 

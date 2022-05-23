@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from opservatory.models import Fleet, Machine
+from opservatory.models import Fleet
 
 
 class InfrastructureCommunicator(ABC):
