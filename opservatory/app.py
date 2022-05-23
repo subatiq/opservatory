@@ -47,32 +47,6 @@ def cancel_reservation(repo: StateRepository, machine_ip: IPv4Address, username:
         machine.reservation = None
 
 
-def reserve_machine(repo: StateRepository, machine_ip: IPv4Address, reservation: Reservation) -> bool:
-    fleet = repo.read_fleet()
-
-    machine = fleet.ip2machine[machine_ip]
-    if machine.reservation is not None:
-        return False
-
-    machine.reservation = reservation
-    save_fleet(fleet, repo)
-
-    return True
-
-
-def cancel_reservation(repo: StateRepository, machine_ip: IPv4Address, username: str) -> bool:
-    fleet = repo.read_fleet()
-    machine = fleet.ip2machine[machine_ip]
-
-    if machine.reservation and machine.reservation.user.credentials.username != username:
-        raise Exception("You are not the owner of this machine")
-
-    machine.reservation = None
-    save_fleet(fleet, repo)
-
-    return True
-
-
 def get_fleet_state(repo: StateRepository) -> Fleet:
     return repo.read_fleet()
 
