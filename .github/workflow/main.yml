@@ -1,16 +1,32 @@
-name: ci 
-on:
-  push:
-    branches:
-      - master 
-      - docs
+name: Testing python
+
+on: [push]
+
 jobs:
-  deploy:
+  build:
+
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9"]
+
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v3
         with:
-          python-version: 3.x
-      - run: pip install mkdocs-material 
-      - run: mkdocs gh-deploy --force
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python3 -m pip install pipenv
+          pipenv install --dev --clear --system --ignore-pipfile
+
+      - name: Lint with pre-commit configuration
+        run: |
+          pip3 install pre-commit
+          pre-commit run --all-files
+
+      - name: Test with pytest
+        run: |
+          python3 -m pytest tests

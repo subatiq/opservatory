@@ -12,14 +12,21 @@ pytimeparse = "*"
 jinja2 = "*"
 kornet = "0.0.18"
 loguru = "*"
-bandit = "*"
 pyyaml = "*"
 python-jose = {extras = ["cryptography"], version = "*"}
 passlib = "*"
+werkzeug = "==2.0.1"
 
 [dev-packages]
 wily = "*"
 pre-commit = "*"
+hypothesis = "*"
+black = "*"
+bandit = "*"
+pytest = "*"
 
 [requires]
 python_version = "3.9"
+
+[pipenv]
+allow_prereleases = true

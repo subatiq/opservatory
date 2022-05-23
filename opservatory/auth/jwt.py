@@ -1,11 +1,11 @@
-from datetime import datetime, timedelta
 import time
+from datetime import datetime, timedelta
 from typing import Optional
+
 from jose import JWTError, jwt
 from pydantic import SecretStr
 
 from opservatory.auth.exceptions import UnableToValidateToken
-from opservatory.auth.models import User
 
 
 def create_access_token(
@@ -34,7 +34,6 @@ def decode_payload(token: str, secret_key: SecretStr, algorithm: str) -> dict:
 
 def user_from_token(token: str, secret_key: SecretStr, algorithm: str) -> str:
     payload = decode_payload(token, secret_key, algorithm)
-    print(payload)
     user = payload["user"].get("credentials", {}).get("username")
     if not user:
         UnableToValidateToken()

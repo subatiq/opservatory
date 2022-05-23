@@ -20,7 +20,7 @@ services:
     ports:
      - "80:5000"
     volumes:
-      - ./volumes:/app/opservatory/volumes
+      - ./volumes:/app/opservatory/mounts
 ```
 
 ```bash

@@ -3,12 +3,12 @@ from __future__ import annotations
 from datetime import datetime
 from enum import Enum
 from ipaddress import IPv4Address
-
-from pydantic import BaseModel
 from typing import Any, Optional
+
 from pydantic import BaseModel, SecretStr
 
 from opservatory.auth.models import User
+from opservatory.exceptions import MachineNotFound
 
 
 class Entity(BaseModel):
@@ -75,6 +75,9 @@ class Machine(Entity):
     updated_at: datetime = datetime.now()
     state: MachineState = MachineState.UNREACHABLE
 
+    def is_free(self) -> bool:
+        return self.state == MachineState.FREE
+
     def update_facts(self, updater: Machine):
         self.ip = updater.ip
         self.system = updater.system
@@ -89,6 +92,12 @@ class Fleet(Entity):
     @property
     def ip2machine(self) -> dict[IPv4Address, Machine]:
         return {machine.ip: machine for machine in self.machines}
+
+    def find(self, ip: IPv4Address) -> Machine:
+        if not (machine := self.ip2machine.get(ip)):
+            raise MachineNotFound(ip)
+
+        return machine
 
 
 class AuthConfig(Entity):
