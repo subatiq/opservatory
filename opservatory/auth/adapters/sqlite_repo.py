@@ -5,8 +5,7 @@ from passlib.context import CryptContext
 from pydantic import SecretStr
 
 from opservatory.auth.auth_repo import AuthRepository
-from opservatory.auth.exceptions import (IncorrectPassword, UserAlreadyExists,
-                                         UserDoesNotExist)
+from opservatory.auth.exceptions import IncorrectPassword, UserAlreadyExists, UserDoesNotExist
 from opservatory.auth.models import ContactInfo, Credentials, Privilege, User
 
 
@@ -73,6 +72,8 @@ class SQLiteAuthRepository(AuthRepository):
         raise IncorrectPassword()
 
     def change_privilege(self, username: str, privilege: Privilege) -> None:
-        cursor = self.conn.execute("UPDATE users SET privilege = ? WHERE username = ?", (privilege, username))
+        cursor = self.conn.execute(
+            "UPDATE users SET privilege = ? WHERE username = ?", (privilege, username)
+        )
         self.conn.commit()
         cursor.close()

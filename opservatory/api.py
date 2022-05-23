@@ -11,13 +11,10 @@ from loguru import logger
 from passlib.context import CryptContext
 from starlette.datastructures import Headers
 
-from opservatory.app import (cancel_reservation, get_fleet_state,
-                             reserve_machine)
+from opservatory.app import cancel_reservation, get_fleet_state, reserve_machine
 from opservatory.auth.adapters.sqlite_repo import SQLiteAuthRepository
-from opservatory.auth.exceptions import (IncorrectPassword, UserAlreadyExists,
-                                         UserDoesNotExist)
-from opservatory.auth.jwt import (create_access_token, user_from_token,
-                                  verify_token)
+from opservatory.auth.exceptions import IncorrectPassword, UserAlreadyExists, UserDoesNotExist
+from opservatory.auth.jwt import create_access_token, user_from_token, verify_token
 from opservatory.auth.models import Credentials, User
 from opservatory.models import Config, Fleet, Reservation, ReservationRequest
 from opservatory.scheduler import sched
@@ -53,7 +50,10 @@ ACCESS_TOKEN_EXPIRE_MINUTES = timedelta(seconds=3600 * 24 * 30)
 
 def check_token(headers: Headers) -> bool:
     return verify_token(
-        headers.get("Authorization", " ").split(" ")[1], SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
+        headers.get("Authorization", " ").split(" ")[1],
+        SECRET_KEY,
+        ALGORITHM,
+        ACCESS_TOKEN_EXPIRE_MINUTES,
     )
 
 
@@ -66,7 +66,9 @@ async def state() -> Fleet:
 @api.get("/me")
 async def read_me(request: Request) -> User:
     repo = SQLiteAuthRepository(filepath=USER_DB_PATH, pwd_context=pwd_context)
-    username = user_from_token(request.headers.get("Authorization", " ").split(" ")[1], SECRET_KEY, ALGORITHM)
+    username = user_from_token(
+        request.headers.get("Authorization", " ").split(" ")[1], SECRET_KEY, ALGORITHM
+    )
     return repo.user_info(username)
 
 
@@ -87,7 +89,10 @@ async def login(credentials: Credentials, request: Request):
         user = repo.login(credentials)
         to_encode = {"user": user.dict(exclude={"credentials": {"password"}, "contacts": True})}
         token = create_access_token(
-            data=to_encode, secret_key=SECRET_KEY, algorithm=ALGORITHM, expires_delta=ACCESS_TOKEN_EXPIRE_MINUTES
+            data=to_encode,
+            secret_key=SECRET_KEY,
+            algorithm=ALGORITHM,
+            expires_delta=ACCESS_TOKEN_EXPIRE_MINUTES,
         )
         return {"token": token}
     except IncorrectPassword:
@@ -110,7 +115,9 @@ async def register(user: User):
 async def reserve(reservation_req: ReservationRequest, request: Request):
     repo = JsonStateRepository(path=STATE_DUMP_PATH)
     users = SQLiteAuthRepository(filepath=USER_DB_PATH, pwd_context=pwd_context)
-    username = user_from_token(request.headers.get("Authorization", " ").split(" ")[1], SECRET_KEY, ALGORITHM)
+    username = user_from_token(
+        request.headers.get("Authorization", " ").split(" ")[1], SECRET_KEY, ALGORITHM
+    )
     user = users.user_info(username)
 
     reservation = Reservation.from_request(reservation_req, user)
@@ -124,7 +131,9 @@ async def reserve(reservation_req: ReservationRequest, request: Request):
 @api.delete("/reservation")
 async def delete_reservation(machine_ip: IPv4Address, request: Request):
     repo = JsonStateRepository(path=STATE_DUMP_PATH)
-    username = user_from_token(request.headers.get("Authorization", " ").split(" ")[1], SECRET_KEY, ALGORITHM)
+    username = user_from_token(
+        request.headers.get("Authorization", " ").split(" ")[1], SECRET_KEY, ALGORITHM
+    )
 
     success = cancel_reservation(repo, machine_ip, username)
 
@@ -137,7 +146,9 @@ async def delete_reservation(machine_ip: IPv4Address, request: Request):
 app.include_router(api)
 
 app.mount("/", StaticFiles(directory=PROJECT_PATH / "client" / "public", html=True), name="app")
-app.mount("/build", StaticFiles(directory=PROJECT_PATH / "client" / "public" / "build"), name="build")
+app.mount(
+    "/build", StaticFiles(directory=PROJECT_PATH / "client" / "public" / "build"), name="build"
+)
 
 app.add_middleware(
     CORSMiddleware,
