@@ -5,7 +5,7 @@ from enum import Enum
 from ipaddress import IPv4Address
 from typing import Any, Optional
 
-from pydantic import BaseModel, SecretStr
+from pydantic import BaseModel, PrivateAttr, SecretStr
 
 from opservatory.auth.models import User
 from opservatory.exceptions import MachineNotFound
@@ -67,20 +67,36 @@ class ReservationRequest(Entity):
 class Machine(Entity):
     ip: IPv4Address
     hostname: str
-    ram: Memory  # ansible_memory_mb.real.total
+    ram: Memory
     os: OS
     processor: Processor
     containers: list[DockerContainer]
     reservation: Optional[Reservation] = None
     updated_at: datetime = datetime.now()
-    state: MachineState = MachineState.UNREACHABLE
+    _state: MachineState = PrivateAttr(MachineState.UNREACHABLE)
+
+    def connection_broken(self):
+        self._state = MachineState.UNREACHABLE
+
+    def reserve(self, reservation: Reservation):
+        self.reservation = reservation
+        self._state = MachineState.RESERVED
+
+    @property
+    def state(self) -> MachineState:
+        if self.reservation:
+            return MachineState.RESERVED
+        elif self.containers:
+            return MachineState.BUSY
+        elif self._state == MachineState.UNREACHABLE:
+            return MachineState.UNREACHABLE
+        return self._state
 
     def is_free(self) -> bool:
         return self.state == MachineState.FREE
 
     def update_facts(self, updater: Machine):
-        self.ip = updater.ip
-        self.system = updater.system
+        self.os = updater.os
         self.ram = updater.ram
         self.processor = updater.processor
         self.updated_at = datetime.now()
