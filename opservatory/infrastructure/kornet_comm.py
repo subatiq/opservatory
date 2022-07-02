@@ -11,8 +11,7 @@ from loguru import logger
 from pytimeparse.timeparse import timeparse
 
 from opservatory.infrastructure.communicator import InfrastructureCommunicator
-from opservatory.models import (OS, DockerContainer, Fleet, Machine,
-                                MachineState, Memory, Processor)
+from opservatory.models import OS, DockerContainer, Fleet, Machine, Memory, Processor
 
 CURRENT_PATH = Path(os.path.dirname(__file__))
 
@@ -69,16 +68,20 @@ class KornetCommunicator(InfrastructureCommunicator):
                         containers=[],
                     )
                 )
-            if outcome.facts.os or outcome.facts.ram or outcome.facts.cpu:
-                fleet.ip2machine[host.ip].state = MachineState.FREE
 
             if outcome.facts.os:
-                fleet.ip2machine[host.ip].os = OS(distribution=outcome.facts.os.name, version=outcome.facts.os.version)
+                fleet.ip2machine[host.ip].os = OS(
+                    distribution=outcome.facts.os.name, version=outcome.facts.os.version
+                )
             if outcome.facts.ram:
-                fleet.ip2machine[host.ip].ram = Memory(total=outcome.facts.ram.total, free=outcome.facts.ram.available)
+                fleet.ip2machine[host.ip].ram = Memory(
+                    total=outcome.facts.ram.total, free=outcome.facts.ram.available
+                )
             if outcome.facts.cpu:
                 fleet.ip2machine[host.ip].processor = Processor(
-                    cores=outcome.facts.cpu.cores, architecture=outcome.facts.cpu.arch, name=outcome.facts.cpu.model
+                    cores=outcome.facts.cpu.cores,
+                    architecture=outcome.facts.cpu.arch,
+                    name=outcome.facts.cpu.model,
                 )
             if outcome.facts.hostname:
                 fleet.ip2machine[host.ip].hostname = outcome.facts.hostname
@@ -105,11 +108,6 @@ class KornetCommunicator(InfrastructureCommunicator):
                 containers.append(self._parse_container(container))
 
             fleet.ip2machine[host.ip].containers = containers
-
-            fleet.ip2machine[host.ip].state = MachineState.FREE
-            if len(containers) > 0 and fleet.ip2machine[host.ip].state != MachineState.RESERVED:
-                fleet.ip2machine[host.ip].state = MachineState.BUSY
-
             fleet.ip2machine[host.ip].updated_at = datetime.now()
 
         return fleet

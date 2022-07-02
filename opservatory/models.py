@@ -3,27 +3,41 @@ from __future__ import annotations
 from datetime import datetime
 from enum import Enum
 from ipaddress import IPv4Address
+from typing import Any, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, PrivateAttr, SecretStr
+
+from opservatory.auth.models import User
+from opservatory.exceptions import MachineNotFound
 
 
-class OS(BaseModel):
+class Entity(BaseModel):
+    def update(self, other: Entity):
+        self.__dict__.update(self.__class__(**other.__dict__))
+        return self
+
+    def patch(self, data: dict[str, Any]):
+        self.__dict__.update(self.__class__(**(self.__dict__ | data)))
+        return self
+
+
+class OS(Entity):
     distribution: str
     version: str
 
 
-class Memory(BaseModel):
+class Memory(Entity):
     free: int
     total: int
 
 
-class Processor(BaseModel):
+class Processor(Entity):
     architecture: str  # ansible_architecture
     name: str  # ansible_processor[2]
     cores: int  # ansible_processor_cores
 
 
-class DockerContainer(BaseModel):
+class DockerContainer(Entity):
     tag: str
     name: str
     uptime: int
@@ -36,36 +50,81 @@ class MachineState(str, Enum):
     RESERVED = "reserved"
 
 
-class Machine(BaseModel):
+class Reservation(Entity):
+    user: User
+    reason: str
+
+    @staticmethod
+    def from_request(request: ReservationRequest, user: User) -> Reservation:
+        return Reservation(**request.dict(exclude={"machine_ip"}), user=user)
+
+
+class ReservationRequest(Entity):
+    reason: str
+    machine_ip: IPv4Address
+
+
+class Machine(Entity):
     ip: IPv4Address
     hostname: str
-    ram: Memory  # ansible_memory_mb.real.total
+    ram: Memory
     os: OS
     processor: Processor
     containers: list[DockerContainer]
+    reservation: Optional[Reservation] = None
     updated_at: datetime = datetime.now()
-    state: MachineState = MachineState.UNREACHABLE
+    _state: MachineState = PrivateAttr(MachineState.UNREACHABLE)
+
+    def connection_broken(self):
+        self._state = MachineState.UNREACHABLE
+
+    def reserve(self, reservation: Reservation):
+        self.reservation = reservation
+        self._state = MachineState.RESERVED
+
+    @property
+    def state(self) -> MachineState:
+        if self.reservation:
+            return MachineState.RESERVED
+        elif self.containers:
+            return MachineState.BUSY
+        elif self._state == MachineState.UNREACHABLE:
+            return MachineState.UNREACHABLE
+        return self._state
+
+    def is_free(self) -> bool:
+        return self.state == MachineState.FREE
 
     def update_facts(self, updater: Machine):
-        self.ip = updater.ip
-        self.system = updater.system
+        self.os = updater.os
         self.ram = updater.ram
         self.processor = updater.processor
         self.updated_at = datetime.now()
 
 
-class Fleet(BaseModel):
+class Fleet(Entity):
     machines: list[Machine]
 
     @property
     def ip2machine(self) -> dict[IPv4Address, Machine]:
         return {machine.ip: machine for machine in self.machines}
 
+    def find(self, ip: IPv4Address) -> Machine:
+        if not (machine := self.ip2machine.get(ip)):
+            raise MachineNotFound(ip)
 
-class Config(BaseModel):
+        return machine
+
+
+class AuthConfig(Entity):
+    secret_key: SecretStr
+
+
+class Config(Entity):
     company_name: str
+    auth: AuthConfig
 
 
-class FrontendContext(BaseModel):
+class FrontendContext(Entity):
     machines: list[Machine]
     company_name: str

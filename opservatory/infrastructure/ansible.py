@@ -13,8 +13,7 @@ from pytimeparse.timeparse import timeparse
 
 from opservatory.infrastructure.communicator import InfrastructureCommunicator
 from opservatory.infrastructure.models import InventoryMachine
-from opservatory.models import (OS, DockerContainer, Fleet, Machine, Memory,
-                                Processor)
+from opservatory.models import OS, DockerContainer, Fleet, Machine, Memory, Processor
 
 MachineInfo = dict[str, Any]
 CURRENT_PATH = Path(os.path.dirname(__file__))
@@ -56,7 +55,8 @@ class AnsibleInfrastructureCommunicator(InfrastructureCommunicator):
 
     def _parse_os(self, machine_info: MachineInfo) -> OS:
         return OS(
-            distribution=machine_info["ansible_distribution"], version=machine_info["ansible_distribution_version"]
+            distribution=machine_info["ansible_distribution"],
+            version=machine_info["ansible_distribution_version"],
         )
 
     def _parse_ram(self, machine_info: MachineInfo) -> Memory:
@@ -65,7 +65,9 @@ class AnsibleInfrastructureCommunicator(InfrastructureCommunicator):
             total=machine_info["ansible_memory_mb"]["real"]["total"],
         )
 
-    def _parse_machine(self, machine_info: MachineInfo, containers: list[DockerContainer]) -> Machine:
+    def _parse_machine(
+        self, machine_info: MachineInfo, containers: list[DockerContainer]
+    ) -> Machine:
         processor = self._parse_processor(machine_info)
         os = self._parse_os(machine_info)
         ram = self._parse_ram(machine_info)
@@ -91,7 +93,8 @@ class AnsibleInfrastructureCommunicator(InfrastructureCommunicator):
         return [
             result["event_data"]
             for result in runner.events
-            if "msg" in result.get("stdout", {}) and result.get("event_data", {}).get("host") == host
+            if "msg" in result.get("stdout", {})
+            and result.get("event_data", {}).get("host") == host
         ]
 
     def _find_docker_containers(self) -> Runner:
@@ -117,7 +120,9 @@ class AnsibleInfrastructureCommunicator(InfrastructureCommunicator):
                 containers_registred.append(container)
         return containers_registred
 
-    def _parse_inventory_machine(self, name: str, inventory_machine: dict[str, Any]) -> InventoryMachine:
+    def _parse_inventory_machine(
+        self, name: str, inventory_machine: dict[str, Any]
+    ) -> InventoryMachine:
         return InventoryMachine(
             name=name,
             ip=inventory_machine["ansible_host"],
