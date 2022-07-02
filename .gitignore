@@ -5,6 +5,7 @@ __pycache__/
 *$py.class
 state.json
 hosts
+fleet.yml
 
 # C extensions
 *.so
