@@ -2,7 +2,6 @@
 ![](docs/brands/full_logo_black.svg#gh-light-mode-only)
 
 <p align="center">
-  <img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/subatiq/opservatory?color=black&style=for-the-badge">
   <img alt="Code style" src="https://img.shields.io/badge/license-mozilla%20PL%202-black?style=for-the-badge">
   <img alt="Gitlab code coverage" src="https://img.shields.io/gitlab/coverage/subatiq/opservatory/master?style=for-the-badge">
   <img alt="Code style" src="https://img.shields.io/badge/code%20style-black-black?style=for-the-badge">
