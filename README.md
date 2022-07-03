@@ -15,9 +15,9 @@ CLI https://github.com/subatiq/ops
 
 ## Quick start
 
-Step 1.0  Put Ansible hosts file into inventory
+Step 1.0  Put Kornet fleet.yml file into inventory
 
-`opservatory/infrastructure/inventory/` <- file named hosts should be here
+`opservatory/infrastructure/inventory/` <- file named fleet.yml should be here
 
 Step 1.5  Replace company name in config.json
 
