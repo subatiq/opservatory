@@ -19,6 +19,8 @@ Step 1.0  Put Kornet fleet.yml file into inventory
 
 `opservatory/infrastructure/inventory/` <- file named fleet.yml should be here
 
+NOTE: if you are using docker, put `fleet.yml` into `volumes/inventory`
+
 Step 1.5  Replace company name in config.json
 
 Step 2.0  Run locally
@@ -34,6 +36,13 @@ docker build -t opservatory .
 docker run -p 5000:5000 opservatory
 ```
 
+## To add/remove device
+
+1. Stop running container
+2. Remove `volumes/state.json`
+3. Edit `volumes/inventory/fleet.yml`
+4. Start container again
+
 ---
 
-Made by [Subatiq](https://github.com/subatiq) for the team of Edge Vision. Powered by [Kornet](https://subatiq.github.io/kornet/)
+Made by [Subatiq](https://github.com/subatiq) for the team of INVIAN. Powered by [Kornet](https://subatiq.github.io/kornet/)
