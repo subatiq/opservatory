@@ -20,7 +20,7 @@ STATE_DUMP_PATH = PROJECT_PATH / "volumes" / "state.json"
 
 @sched.scheduled_job(
     id="facts_update",
-    trigger=CronTrigger.from_crontab("*/10 * * * *"),
+    trigger=CronTrigger.from_crontab("*/1 * * * *"),
     next_run_time=datetime.now(),
 )
 def update_fleet():
