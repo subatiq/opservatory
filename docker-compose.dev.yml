@@ -8,3 +8,6 @@ services:
     volumes:
       - ./volumes:/app/opservatory/volumes
       - ./volumes/inventory:/app/opservatory/infrastructure/inventory
+    logging:
+      options:
+        max-size: 50m
